@@ -1,0 +1,13 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.cache
+*.dll
+*.pdb
+*.exe
+*.deps.json
+*.runtimeconfig.json
+TestResults/
+test.png
