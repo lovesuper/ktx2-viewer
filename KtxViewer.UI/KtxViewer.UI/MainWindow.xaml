@@ -6,6 +6,7 @@
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
         Title="KTX2 Viewer" Height="700" Width="1000"
+        Icon="icon.ico"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -14,8 +15,9 @@
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="60"
                            ResizeBorderThickness="5"
-                           CornerRadius="12"
-                           GlassFrameThickness="0"/>
+                           CornerRadius="0"
+                           GlassFrameThickness="0"
+                           UseAeroCaptionButtons="False"/>
     </shell:WindowChrome.WindowChrome>
 
     <Window.Resources>
@@ -54,7 +56,7 @@
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="12" Background="#E0101010" BorderBrush="#40FFFFFF" BorderThickness="1">
+    <Border x:Name="MainBorder" CornerRadius="12" Background="#E0101010" BorderBrush="#40FFFFFF" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect ShadowDepth="0" BlurRadius="30" Opacity="0.5"/>
         </Border.Effect>
@@ -77,43 +79,27 @@
                                Margin="20,0,0,0"/>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-                        <Button Click="Minimize_Click"
-                                Width="40" Height="30"
+                        <Button Content="min"
+                                Click="Minimize_Click"
+                                Width="60" Height="30"
                                 Style="{StaticResource GlassButton}"
                                 Margin="5,0"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                            <Path Data="M0,0 L10,0"
-                                  Stroke="White"
-                                  StrokeThickness="1.5"
-                                  Stretch="Uniform"
-                                  Width="12"
-                                  Height="12"/>
-                        </Button>
-                        <Button Click="Maximize_Click"
-                                Width="40" Height="30"
+                                FontSize="13"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        <Button Content="max"
+                                Click="Maximize_Click"
+                                Width="60" Height="30"
                                 Style="{StaticResource GlassButton}"
                                 Margin="5,0"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                            <Path Data="M0,0 L10,0 L10,10 L0,10 Z"
-                                  Stroke="White"
-                                  StrokeThickness="1.5"
-                                  Fill="Transparent"
-                                  Stretch="Uniform"
-                                  Width="12"
-                                  Height="12"/>
-                        </Button>
-                        <Button Click="Close_Click"
-                                Width="40" Height="30"
+                                FontSize="13"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        <Button Content="close"
+                                Click="Close_Click"
+                                Width="70" Height="30"
                                 Style="{StaticResource GlassButton}"
                                 Margin="5,0"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                            <Path Data="M0,0 L10,10 M10,0 L0,10"
-                                  Stroke="White"
-                                  StrokeThickness="1.5"
-                                  Stretch="Uniform"
-                                  Width="12"
-                                  Height="12"/>
-                        </Button>
+                                FontSize="13"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -143,7 +129,8 @@
                                      PreviewMouseLeftButtonDown="ScrollViewer_PreviewMouseLeftButtonDown"
                                      PreviewMouseMove="ScrollViewer_PreviewMouseMove"
                                      PreviewMouseLeftButtonUp="ScrollViewer_PreviewMouseLeftButtonUp"
-                                     Background="Transparent">
+                                     Background="Transparent"
+                                     IsHitTestVisible="{Binding CurrentImage, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}">
                             <Image x:Name="ZoomImage"
                                    Source="{Binding CurrentImage}"
                                    Stretch="None"

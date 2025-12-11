@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace KtxViewer.UI;
 
@@ -13,6 +14,28 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = viewModel;
+        StateChanged += MainWindow_StateChanged;
+    }
+
+    private void MainWindow_StateChanged(object? sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            MainBorder.CornerRadius = new CornerRadius(0);
+            MainBorder.Margin = new Thickness(
+                SystemParameters.WorkArea.Left,
+                SystemParameters.WorkArea.Top,
+                SystemParameters.PrimaryScreenWidth - SystemParameters.WorkArea.Right,
+                SystemParameters.PrimaryScreenHeight - SystemParameters.WorkArea.Bottom
+            );
+            MainBorder.BorderThickness = new Thickness(0);
+        }
+        else
+        {
+            MainBorder.CornerRadius = new CornerRadius(8);
+            MainBorder.Margin = new Thickness(0);
+            MainBorder.BorderThickness = new Thickness(1);
+        }
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

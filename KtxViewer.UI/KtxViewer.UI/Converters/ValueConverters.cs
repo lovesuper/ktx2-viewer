@@ -8,7 +8,15 @@ public sealed class NullToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return value == null ? Visibility.Visible : Visibility.Collapsed;
+        var isInverse = parameter?.ToString() == "Inverse";
+        var isNull = value == null;
+
+        if (targetType == typeof(bool))
+        {
+            return isInverse ? !isNull : isNull;
+        }
+
+        return (isInverse ? !isNull : isNull) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
