@@ -1,0 +1,39 @@
+name: .NET Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore KtxViewer.sln
+
+      - name: Build
+        run: dotnet build KtxViewer.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test KtxViewer.Tests/KtxViewer.Tests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Publish Windows x64
+        run: dotnet publish KtxViewer.UI/KtxViewer.UI/KtxViewer.UI.csproj --configuration Release --runtime win-x64 --self-contained false /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output publish/win-x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ktx-viewer-win-x64
+          path: publish/win-x64
+          if-no-files-found: error
