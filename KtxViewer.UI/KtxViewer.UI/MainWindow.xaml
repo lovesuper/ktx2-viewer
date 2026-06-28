@@ -162,6 +162,7 @@
                         </StackPanel>
 
                         <ScrollViewer x:Name="ImageScrollViewer"
+                                     Style="{StaticResource GlassScrollViewer}"
                                      HorizontalScrollBarVisibility="Auto"
                                      VerticalScrollBarVisibility="Auto"
                                      PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"

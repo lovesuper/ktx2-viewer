@@ -300,9 +300,25 @@ public partial class MainWindow : Window
         if (sender is not ScrollViewer scrollViewer)
             return;
 
+        // Don't start panning when the press begins on a scrollbar - otherwise the pan
+        // grabs the click and the scrollbar never gets it (image drags instead of scrolling).
+        if (e.OriginalSource is DependencyObject src && FindAncestor<ScrollBar>(src) != null)
+            return;
+
         _lastDragPoint = e.GetPosition(scrollViewer);
         scrollViewer.Cursor = Cursors.Hand;
         scrollViewer.CaptureMouse();
+    }
+
+    private static T? FindAncestor<T>(DependencyObject? current) where T : DependencyObject
+    {
+        while (current != null)
+        {
+            if (current is T match)
+                return match;
+            current = VisualTreeHelper.GetParent(current) ?? LogicalTreeHelper.GetParent(current);
+        }
+        return null;
     }
 
     private void ScrollViewer_PreviewMouseMove(object sender, MouseEventArgs e)
@@ -321,7 +337,8 @@ public partial class MainWindow : Window
 
     private void ScrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (sender is not ScrollViewer scrollViewer)
+        // Only act if we were actually panning (a scrollbar press is left untouched).
+        if (sender is not ScrollViewer scrollViewer || !_lastDragPoint.HasValue)
             return;
 
         _lastDragPoint = null;
