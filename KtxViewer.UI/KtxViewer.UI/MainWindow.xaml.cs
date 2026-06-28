@@ -30,6 +30,13 @@ public partial class MainWindow : Window
         // does not spill past the screen edges or cover the taskbar.
         var handle = new WindowInteropHelper(this).Handle;
         HwndSource.FromHwnd(handle)?.AddHook(WindowProc);
+
+        // Allow drag-and-drop from a normal (non-elevated) Explorer even when this
+        // process runs elevated. Without this, UIPI silently blocks the drop messages,
+        // so D&D appears to "do nothing" when the app is launched as Administrator.
+        ChangeWindowMessageFilterEx(handle, WM_DROPFILES, MSGFLT_ALLOW, IntPtr.Zero);
+        ChangeWindowMessageFilterEx(handle, WM_COPYDATA, MSGFLT_ALLOW, IntPtr.Zero);
+        ChangeWindowMessageFilterEx(handle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, IntPtr.Zero);
     }
 
     private void FileListResizer_DragDelta(object sender, DragDeltaEventArgs e)
@@ -222,6 +229,16 @@ public partial class MainWindow : Window
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+    // UIPI message filter: lets drag-and-drop messages through when the app is elevated.
+    private const uint MSGFLT_ALLOW = 1;
+    private const uint WM_DROPFILES = 0x0233;
+    private const uint WM_COPYDATA = 0x004A;
+    private const uint WM_COPYGLOBALDATA = 0x0049;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ChangeWindowMessageFilterEx(IntPtr hwnd, uint message, uint action, IntPtr pChangeFilterStruct);
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

@@ -315,7 +315,7 @@ public sealed partial class MainViewModel : ObservableObject
     /// Loads a set of files into the playlist and shows the first one.
     /// Unsupported extensions and duplicates are filtered out.
     /// </summary>
-    public async Task LoadFilesAsync(IEnumerable<string> paths)
+    public async Task LoadFilesAsync(IEnumerable<string> paths, CancellationToken cancellationToken = default)
     {
         var valid = paths
             .Where(p => !string.IsNullOrWhiteSpace(p) && IsSupportedFile(p))
@@ -334,10 +334,10 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         _currentIndex = 0;
-        await LoadCurrentAsync();
+        await LoadCurrentAsync(cancellationToken);
     }
 
-    private async Task LoadCurrentAsync()
+    private async Task LoadCurrentAsync(CancellationToken cancellationToken = default)
     {
         if (_currentIndex < 0 || _currentIndex >= Playlist.Count)
         {
@@ -345,7 +345,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         UpdateNavigationState();
-        await LoadFileAsync(Playlist[_currentIndex]);
+        await LoadFileAsync(Playlist[_currentIndex], cancellationToken);
     }
 
     private void UpdateNavigationState()
@@ -363,7 +363,7 @@ public sealed partial class MainViewModel : ObservableObject
     private bool CanGoPrevious() => _currentIndex > 0;
 
     [RelayCommand(CanExecute = nameof(CanGoNext))]
-    private async Task NextImage()
+    private async Task NextImage(CancellationToken cancellationToken = default)
     {
         if (!CanGoNext())
         {
@@ -371,11 +371,11 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         _currentIndex++;
-        await LoadCurrentAsync();
+        await LoadCurrentAsync(cancellationToken);
     }
 
     [RelayCommand(CanExecute = nameof(CanGoPrevious))]
-    private async Task PreviousImage()
+    private async Task PreviousImage(CancellationToken cancellationToken = default)
     {
         if (!CanGoPrevious())
         {
@@ -383,10 +383,10 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         _currentIndex--;
-        await LoadCurrentAsync();
+        await LoadCurrentAsync(cancellationToken);
     }
 
-    public async Task LoadFileAsync(string filePath)
+    public async Task LoadFileAsync(string filePath, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(filePath))
         {
@@ -404,7 +404,7 @@ public sealed partial class MainViewModel : ObservableObject
                 LoadProgress = Math.Min(90, value * 0.9);
             });
 
-            var image = await _loadImageUseCase.ExecuteAsync(filePath, default, progress);
+            var image = await _loadImageUseCase.ExecuteAsync(filePath, cancellationToken, progress);
 
             LoadProgress = 95;
             await Task.Yield();
@@ -486,7 +486,7 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenFileAsync()
+    private async Task OpenFileAsync(CancellationToken cancellationToken = default)
     {
         var dialog = new OpenFileDialog
         {
@@ -497,7 +497,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         if (dialog.ShowDialog() == true)
         {
-            await LoadFilesAsync(dialog.FileNames);
+            await LoadFilesAsync(dialog.FileNames, cancellationToken);
         }
     }
 
