@@ -72,14 +72,27 @@ VIAddVersionKey "LegalCopyright"  "${APP_PUBLISHER}"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 
-!define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_EXE}"
+; Launch via a custom function so the app starts NON-elevated (see LaunchAppAsUser).
+!define MUI_FINISHPAGE_RUN ""
 !define MUI_FINISHPAGE_RUN_TEXT "Launch ${APP_NAME}"
+!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchAppAsUser"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
+
+;--------------------------------
+; Launch the app with the user's normal token after install.
+; The installer runs elevated (admin), so a direct Exec would start the app elevated
+; too - and Windows (UIPI) then blocks drag-and-drop from a normal Explorer window.
+; Launching through Explorer makes the app inherit the logged-in user's (non-elevated)
+; token, so drag-and-drop works.
+
+Function LaunchAppAsUser
+  Exec '"$WINDIR\explorer.exe" "$INSTDIR\${APP_EXE}"'
+FunctionEnd
 
 ;--------------------------------
 ; Sections
