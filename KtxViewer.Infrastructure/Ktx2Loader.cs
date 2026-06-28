@@ -32,14 +32,11 @@ public sealed class Ktx2Loader : IKtxLoader
 
         var metadata = await ParseMetadataAsync(stream, header, cancellationToken);
 
-        var vkFormat = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(12));
-        var typeSize = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(16));
-        var width = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(20));
-        var height = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(24));
-        var depth = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(28));
-        var levelCount = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(32));
-        var faceCount = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(36));
-        var layerCount = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(40));
+        var vkFormat = metadata.VkFormat;
+        var width = metadata.PixelWidth;
+        var height = metadata.PixelHeight;
+        var levelCount = metadata.LevelCount;
+        var layerCount = metadata.LayerCount;
 
         if (levelCount == 0) levelCount = 1;
         if (layerCount == 0) layerCount = 1;
@@ -232,20 +229,25 @@ public sealed class Ktx2Loader : IKtxLoader
 
     private async Task<KtxMetadata> ParseMetadataAsync(Stream stream, byte[] header, CancellationToken cancellationToken)
     {
-        var vkFormat = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(12));
-        var typeSize = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(16));
-        var width = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(20));
-        var height = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(24));
-        var depth = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(28));
-        var levelCount = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(32));
-        var faceCount = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(36));
-        var layerCount = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(40));
-        var supercompressionScheme = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(44));
+        var reader = new ByteStreamReader(header);
 
-        var dfdByteOffset = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(48));
-        var dfdByteLength = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(52));
-        var kvdByteOffset = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(56));
-        var kvdByteLength = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(60));
+        const uint IdentifierLengthBytes = 12;
+        reader.Skip(IdentifierLengthBytes);
+
+        var vkFormat = reader.ReadUInt32();
+        var typeSize = reader.ReadUInt32();
+        var width = reader.ReadUInt32();
+        var height = reader.ReadUInt32();
+        var depth = reader.ReadUInt32();
+        var layerCount = reader.ReadUInt32();
+        var faceCount = reader.ReadUInt32();
+        var levelCount = reader.ReadUInt32();
+        var supercompressionScheme = reader.ReadUInt32();
+
+        var dfdByteOffset = reader.ReadUInt32();
+        var dfdByteLength = reader.ReadUInt32();
+        var kvdByteOffset = reader.ReadUInt32();
+        var kvdByteLength = reader.ReadUInt32();
 
         var metadata = new KtxMetadata
         {
